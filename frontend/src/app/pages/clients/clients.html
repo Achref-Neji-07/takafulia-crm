@@ -1,0 +1,250 @@
+<header>
+  <div>
+    <h1>Gestion des clients</h1>
+    <p>Gérez les clients enregistrés dans votre agence.</p>
+  </div>
+
+  <button (click)="openClientForm()">
+    + Nouveau client
+  </button>
+</header>
+
+<section class="content-card">
+
+  <div class="section-header">
+    <div>
+      <h2>Liste des clients</h2>
+      <p>{{ clients().length }} client(s) enregistré(s)</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="message">
+    Chargement des clients...
+  </div>
+
+  <div *ngIf="error()" class="error">
+    {{ error() }}
+  </div>
+
+  <table *ngIf="!loading() && !error() && clients().length > 0">
+
+    <thead>
+      <tr>
+        <th>CLIENT</th>
+        <th>TÉLÉPHONE</th>
+        <th>EMAIL</th>
+        <th>ADRESSE</th>
+        <th>STATUT</th>
+        <th>ACTIONS</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let client of clients()">
+
+        <td>
+          <div class="client">
+
+            <div class="client-avatar">
+              {{ client.prenom.charAt(0) }}{{ client.nom.charAt(0) }}
+            </div>
+
+            <div>
+              <strong>
+                {{ client.prenom }} {{ client.nom }}
+              </strong>
+
+              <small>
+                CIN {{ client.cin || '-' }}
+              </small>
+            </div>
+
+          </div>
+        </td>
+
+        <td>{{ client.telephone }}</td>
+
+        <td>{{ client.email || '-' }}</td>
+
+        <td>{{ client.adresse || '-' }}</td>
+
+        <td>
+          <span
+            class="status"
+            [class.inactive]="!client.actif"
+          >
+            {{ client.actif ? 'Actif' : 'Inactif' }}
+          </span>
+        </td>
+
+        <td class="actions">
+
+          <button
+            type="button"
+            class="edit-button"
+            (click)="editClient(client)"
+          >
+            Modifier
+          </button>
+
+          <button
+            type="button"
+            class="delete-button"
+            (click)="deleteClient(client)"
+          >
+            Supprimer
+          </button>
+
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+  <div
+    *ngIf="!loading() && !error() && clients().length === 0"
+    class="message"
+  >
+    Aucun client enregistré.
+  </div>
+
+</section>
+
+
+<!-- MODAL -->
+
+<div
+  class="modal-overlay"
+  *ngIf="showClientForm"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <div>
+        <h2>
+          {{ editingClient ? 'Modifier le client' : 'Nouveau client' }}
+        </h2>
+
+        <p>
+          {{
+            editingClient
+              ? 'Modifier les informations du client'
+              : 'Enregistrer un nouveau client'
+          }}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="closeClientForm()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <form (ngSubmit)="saveClient()">
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Nom *</label>
+
+          <input
+            type="text"
+            name="nom"
+            [(ngModel)]="newClient.nom"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label>Prénom *</label>
+
+          <input
+            type="text"
+            name="prenom"
+            [(ngModel)]="newClient.prenom"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label>Téléphone *</label>
+
+          <input
+            type="text"
+            name="telephone"
+            [(ngModel)]="newClient.telephone"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label>CIN</label>
+
+          <input
+            type="text"
+            name="cin"
+            [(ngModel)]="newClient.cin"
+          >
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="newClient.email"
+          >
+        </div>
+
+        <div class="form-group">
+          <label>Adresse</label>
+
+          <input
+            type="text"
+            name="adresse"
+            [(ngModel)]="newClient.adresse"
+          >
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="cancel-button"
+          (click)="closeClientForm()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          [disabled]="savingClient"
+        >
+          {{
+            savingClient
+              ? 'Enregistrement...'
+              : editingClient
+                ? 'Enregistrer les modifications'
+                : 'Ajouter le client'
+          }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

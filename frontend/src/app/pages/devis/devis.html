@@ -1,0 +1,299 @@
+<header>
+  <div>
+    <h1>Gestion des devis</h1>
+    <p>Créez et gérez les devis de votre agence.</p>
+  </div>
+
+  <button
+    class="new-button"
+    (click)="openDevisForm()"
+  >
+    + Nouveau devis
+  </button>
+</header>
+
+
+<section class="content-card">
+
+  <div class="section-header">
+    <div>
+      <h2>Liste des devis</h2>
+      <p>{{ devis().length }} devis enregistré(s)</p>
+    </div>
+  </div>
+
+
+  <!-- CHARGEMENT -->
+
+  <div
+    class="message"
+    *ngIf="loading()"
+  >
+    Chargement des devis...
+  </div>
+
+
+  <!-- ERREUR -->
+
+  <div
+    class="error"
+    *ngIf="error()"
+  >
+    {{ error() }}
+  </div>
+
+
+  <!-- AUCUN DEVIS -->
+
+  <div
+    class="empty-state"
+    *ngIf="!loading() && !error() && devis().length === 0"
+  >
+
+    <div class="empty-icon">▤</div>
+
+    <h3>Aucun devis</h3>
+
+    <p>
+      Les devis créés pour vos clients apparaîtront ici.
+    </p>
+
+    <button
+      class="new-button"
+      (click)="openDevisForm()"
+    >
+      + Créer un devis
+    </button>
+
+  </div>
+
+
+  <!-- TABLEAU DES DEVIS -->
+
+  <table
+    *ngIf="!loading() && !error() && devis().length > 0"
+  >
+
+    <thead>
+      <tr>
+        <th>NUMÉRO</th>
+        <th>CLIENT</th>
+        <th>PRODUIT</th>
+        <th>MONTANT</th>
+        <th>STATUT</th>
+        <th>DATE</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let item of devis()">
+
+        <td>
+          <strong>{{ item.numero_devis }}</strong>
+        </td>
+
+        <td>
+          {{ getClientName(item.client_id) }}
+        </td>
+
+        <td>
+          {{ item.produit }}
+        </td>
+
+        <td>
+          {{ item.montant | number:'1.3-3' }} DT
+        </td>
+
+        <td>
+          <span class="status">
+            {{ item.statut }}
+          </span>
+        </td>
+
+        <td>
+          {{ item.date_creation | date:'dd/MM/yyyy' }}
+        </td>
+
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</section>
+
+
+<!-- MODAL NOUVEAU DEVIS -->
+
+<div
+  class="modal-overlay"
+  *ngIf="showDevisForm"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <div>
+        <h2>Nouveau devis</h2>
+        <p>Créer un devis pour un client</p>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="closeDevisForm()"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <form (ngSubmit)="createDevis()">
+
+      <div class="form-grid">
+
+
+        <!-- CLIENT -->
+
+        <div class="form-group">
+
+          <label>Client *</label>
+
+          <select
+            name="client_id"
+            [(ngModel)]="newDevis.client_id"
+            required
+          >
+
+            <option [ngValue]="0">
+              Sélectionner un client
+            </option>
+
+            <option
+              *ngFor="let client of clients()"
+              [ngValue]="client.id"
+            >
+              {{ client.prenom }} {{ client.nom }}
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- PRODUIT -->
+
+        <div class="form-group">
+
+          <label>Produit *</label>
+
+          <select
+            name="produit"
+            [(ngModel)]="newDevis.produit"
+            required
+          >
+
+            <option value="">
+              Sélectionner un produit
+            </option>
+
+            <option value="Assurance Auto">
+              Assurance Auto
+            </option>
+
+            <option value="Assurance Habitation">
+              Assurance Habitation
+            </option>
+
+            <option value="Assurance Santé">
+              Assurance Santé
+            </option>
+
+            <option value="Assistance Voyage">
+              Assistance Voyage
+            </option>
+
+            <option value="Incendie">
+              Incendie
+            </option>
+
+            <option value="Responsabilité Civile">
+              Responsabilité Civile
+            </option>
+
+            <option value="Multirisques Professionnels">
+              Multirisques Professionnels
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- MONTANT -->
+
+        <div class="form-group">
+
+          <label>Montant (DT) *</label>
+
+          <input
+            type="number"
+            name="montant"
+            [(ngModel)]="newDevis.montant"
+            min="0.001"
+            step="0.001"
+            required
+          >
+
+        </div>
+
+
+        <!-- EXPIRATION -->
+
+        <div class="form-group">
+
+          <label>Date d'expiration</label>
+
+          <input
+            type="datetime-local"
+            name="date_expiration"
+            [(ngModel)]="newDevis.date_expiration"
+          >
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="cancel-button"
+          (click)="closeDevisForm()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          class="new-button"
+          [disabled]="savingDevis"
+        >
+          {{
+            savingDevis
+              ? 'Création...'
+              : 'Créer le devis'
+          }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

@@ -1,0 +1,80 @@
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="logo">
+
+      <img
+        src="/takafulia.jpg"
+        alt="Takafulia"
+        class="logo-image"
+      >
+
+      <div>
+        <h2>Takafulia</h2>
+        <span>Insurance CRM</span>
+      </div>
+
+    </div>
+
+
+    <nav>
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+      >
+        <span>▦</span>
+        Dashboard
+      </a>
+
+      <a
+        routerLink="/clients"
+        routerLinkActive="active"
+      >
+        <span>♙</span>
+        Clients
+      </a>
+
+      <a
+  routerLink="/devis"
+  routerLinkActive="active"
+>
+  <span>▤</span>
+  Devis
+</a>
+
+      <a>
+        <span>✓</span>
+        Contrats
+      </a>
+
+      <a>
+        <span>◆</span>
+        Produits
+      </a>
+
+      <a>
+        <span>◫</span>
+        Statistiques
+      </a>
+
+    </nav>
+
+
+    <div class="sidebar-bottom">
+      <a>⚙ Paramètres</a>
+    </div>
+
+  </aside>
+
+
+  <!-- PAGES -->
+  <main class="main">
+
+    <router-outlet></router-outlet>
+
+  </main>
+
+</div>

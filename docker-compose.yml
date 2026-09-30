@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: takafulia-postgres
+
+    environment:
+      POSTGRES_USER: takafulia
+      POSTGRES_PASSWORD: takafulia_dev_password
+      POSTGRES_DB: takafulia_db
+
+    ports:
+      - "55432:5432"
+
+    volumes:
+      - takafulia_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U takafulia -d takafulia_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  takafulia_postgres_data:
