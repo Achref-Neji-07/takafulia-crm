@@ -1,0 +1,270 @@
+<div class="produits-page">
+
+  <h1>Gestion des produits</h1>
+
+  <p>
+    Gérez les produits d'assurance proposés par votre agence.
+  </p>
+
+  <button
+    type="button"
+    class="new-button"
+    (click)="openProduitForm()"
+  >
+    + Nouveau produit
+  </button>
+
+
+  <section class="produits-section">
+
+    <div class="section-header">
+      <div>
+        <h2>Liste des produits</h2>
+
+        <p>
+          {{ produits().length }} produit(s) enregistré(s)
+        </p>
+      </div>
+    </div>
+
+
+    <!-- CHARGEMENT -->
+    <p *ngIf="loading()">
+      Chargement des produits...
+    </p>
+
+
+    <!-- ERREUR -->
+    <p
+      class="error-message"
+      *ngIf="error()"
+    >
+      {{ error() }}
+    </p>
+
+
+    <!-- TABLEAU -->
+    <table
+      *ngIf="
+        !loading() &&
+        produits().length > 0
+      "
+    >
+
+      <thead>
+        <tr>
+          <th>NOM</th>
+          <th>DESCRIPTION</th>
+          <th>STATUT</th>
+          <th>DATE DE CRÉATION</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let produit of produits()">
+
+          <td class="product-name">
+            {{ produit.nom }}
+          </td>
+
+          <td>
+            {{ produit.description || '-' }}
+          </td>
+
+          <td>
+
+            <span
+              class="status"
+              [class.active]="produit.actif"
+              [class.inactive]="!produit.actif"
+            >
+              {{
+                produit.actif
+                  ? 'ACTIF'
+                  : 'INACTIF'
+              }}
+            </span>
+
+          </td>
+
+          <td>
+            {{
+              produit.date_creation
+                | date:'dd/MM/yyyy'
+            }}
+          </td>
+
+          <td class="actions">
+
+            <button
+              type="button"
+              class="toggle-button"
+              (click)="toggleProduit(produit)"
+            >
+              {{
+                produit.actif
+                  ? 'Désactiver'
+                  : 'Activer'
+              }}
+            </button>
+
+            <button
+              type="button"
+              class="edit-button"
+              (click)="editProduit(produit)"
+            >
+              Modifier
+            </button>
+
+            <button
+              type="button"
+              class="delete-button"
+              (click)="deleteProduit(produit)"
+            >
+              Supprimer
+            </button>
+
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+
+    <!-- AUCUN PRODUIT -->
+    <div
+      class="empty"
+      *ngIf="
+        !loading() &&
+        produits().length === 0
+      "
+    >
+      Aucun produit enregistré.
+    </div>
+
+  </section>
+
+
+  <!-- MODAL -->
+  <div
+    class="modal-overlay"
+    *ngIf="showProduitForm"
+  >
+
+    <div class="modal">
+
+      <div class="modal-header">
+
+        <h2>
+          {{
+            editingProduit
+              ? 'Modifier le produit'
+              : 'Nouveau produit'
+          }}
+        </h2>
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="closeProduitForm()"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <form (ngSubmit)="saveProduit()">
+
+        <!-- NOM -->
+        <div class="form-group">
+
+          <label for="nom">
+            Nom du produit *
+          </label>
+
+          <input
+            id="nom"
+            name="nom"
+            type="text"
+            [(ngModel)]="newProduit.nom"
+            placeholder="Ex : Assurance Auto"
+            required
+          >
+
+        </div>
+
+
+        <!-- DESCRIPTION -->
+        <div class="form-group">
+
+          <label for="description">
+            Description
+          </label>
+
+          <textarea
+            id="description"
+            name="description"
+            [(ngModel)]="newProduit.description"
+            placeholder="Description du produit"
+            rows="4"
+          ></textarea>
+
+        </div>
+
+
+        <!-- ACTIF -->
+        <div class="checkbox-group">
+
+          <input
+            id="actif"
+            name="actif"
+            type="checkbox"
+            [(ngModel)]="newProduit.actif"
+          >
+
+          <label for="actif">
+            Produit actif
+          </label>
+
+        </div>
+
+
+        <!-- BOUTONS -->
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="cancel-button"
+            (click)="closeProduitForm()"
+          >
+            Annuler
+          </button>
+
+          <button
+            type="submit"
+            class="save-button"
+            [disabled]="savingProduit"
+          >
+            {{
+              savingProduit
+                ? 'Enregistrement...'
+                : editingProduit
+                  ? 'Enregistrer'
+                  : 'Créer le produit'
+            }}
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>

@@ -6,6 +6,7 @@
 
   <button
     class="new-button"
+    type="button"
     (click)="openDevisForm()"
   >
     + Nouveau devis
@@ -49,7 +50,6 @@
     class="empty-state"
     *ngIf="!loading() && !error() && devis().length === 0"
   >
-
     <div class="empty-icon">▤</div>
 
     <h3>Aucun devis</h3>
@@ -57,18 +57,10 @@
     <p>
       Les devis créés pour vos clients apparaîtront ici.
     </p>
-
-    <button
-      class="new-button"
-      (click)="openDevisForm()"
-    >
-      + Créer un devis
-    </button>
-
   </div>
 
 
-  <!-- TABLEAU DES DEVIS -->
+  <!-- TABLEAU -->
 
   <table
     *ngIf="!loading() && !error() && devis().length > 0"
@@ -82,6 +74,7 @@
         <th>MONTANT</th>
         <th>STATUT</th>
         <th>DATE</th>
+        <th>ACTIONS</th>
       </tr>
     </thead>
 
@@ -90,7 +83,9 @@
       <tr *ngFor="let item of devis()">
 
         <td>
-          <strong>{{ item.numero_devis }}</strong>
+          <strong>
+            {{ item.numero_devis }}
+          </strong>
         </td>
 
         <td>
@@ -106,13 +101,93 @@
         </td>
 
         <td>
-          <span class="status">
-            {{ item.statut }}
+
+          <span
+            class="status"
+            [class.status-accepted]="item.statut === 'ACCEPTE'"
+            [class.status-refused]="item.statut === 'REFUSE'"
+            [class.status-pending]="item.statut === 'EN_ATTENTE'"
+          >
+            {{
+              item.statut === 'ACCEPTE'
+                ? 'ACCEPTÉ'
+                : item.statut === 'REFUSE'
+                  ? 'REFUSÉ'
+                  : 'EN ATTENTE'
+            }}
           </span>
+
         </td>
 
         <td>
           {{ item.date_creation | date:'dd/MM/yyyy' }}
+        </td>
+
+
+        <!-- ACTIONS -->
+
+        <td class="actions">
+
+
+          <!-- VOIR DÉTAILS AUTO -->
+
+          <button
+            *ngIf="item.produit === 'Assurance Auto'"
+            type="button"
+            class="details-button"
+            (click)="voirDetailsAuto(item)"
+            [disabled]="loadingAutoDetails"
+          >
+            Voir détails
+          </button>
+
+
+          <!-- ACCEPTER / REFUSER -->
+
+          <ng-container
+            *ngIf="item.statut === 'EN_ATTENTE'"
+          >
+
+            <button
+              type="button"
+              class="accept-button"
+              (click)="changeStatut(item, 'ACCEPTE')"
+            >
+              Accepter
+            </button>
+
+            <button
+              type="button"
+              class="refuse-button"
+              (click)="changeStatut(item, 'REFUSE')"
+            >
+              Refuser
+            </button>
+
+          </ng-container>
+
+
+          <!-- MODIFIER -->
+
+          <button
+            type="button"
+            class="edit-button"
+            (click)="editDevis(item)"
+          >
+            Modifier
+          </button>
+
+
+          <!-- SUPPRIMER -->
+
+          <button
+            type="button"
+            class="delete-button"
+            (click)="deleteDevis(item)"
+          >
+            Supprimer
+          </button>
+
         </td>
 
       </tr>
@@ -124,7 +199,9 @@
 </section>
 
 
-<!-- MODAL NOUVEAU DEVIS -->
+<!-- ================================================= -->
+<!-- MODAL CRÉATION / MODIFICATION -->
+<!-- ================================================= -->
 
 <div
   class="modal-overlay"
@@ -136,9 +213,25 @@
     <div class="modal-header">
 
       <div>
-        <h2>Nouveau devis</h2>
-        <p>Créer un devis pour un client</p>
+
+        <h2>
+          {{
+            editingDevis
+              ? 'Modifier le devis'
+              : 'Nouveau devis'
+          }}
+        </h2>
+
+        <p>
+          {{
+            editingDevis
+              ? 'Modifier les informations du devis'
+              : 'Créer un devis pour un client'
+          }}
+        </p>
+
       </div>
+
 
       <button
         type="button"
@@ -151,7 +244,7 @@
     </div>
 
 
-    <form (ngSubmit)="createDevis()">
+    <form (ngSubmit)="saveDevis()">
 
       <div class="form-grid">
 
@@ -160,7 +253,9 @@
 
         <div class="form-group">
 
-          <label>Client *</label>
+          <label>
+            Client *
+          </label>
 
           <select
             name="client_id"
@@ -176,7 +271,8 @@
               *ngFor="let client of clients()"
               [ngValue]="client.id"
             >
-              {{ client.prenom }} {{ client.nom }}
+              {{ client.prenom }}
+              {{ client.nom }}
             </option>
 
           </select>
@@ -188,7 +284,9 @@
 
         <div class="form-group">
 
-          <label>Produit *</label>
+          <label>
+            Produit *
+          </label>
 
           <select
             name="produit"
@@ -200,35 +298,21 @@
               Sélectionner un produit
             </option>
 
-            <option value="Assurance Auto">
-              Assurance Auto
-            </option>
-
-            <option value="Assurance Habitation">
-              Assurance Habitation
-            </option>
-
-            <option value="Assurance Santé">
-              Assurance Santé
-            </option>
-
-            <option value="Assistance Voyage">
-              Assistance Voyage
-            </option>
-
-            <option value="Incendie">
-              Incendie
-            </option>
-
-            <option value="Responsabilité Civile">
-              Responsabilité Civile
-            </option>
-
-            <option value="Multirisques Professionnels">
-              Multirisques Professionnels
+            <option
+              *ngFor="let produit of produits()"
+              [value]="produit.nom"
+            >
+              {{ produit.nom }}
             </option>
 
           </select>
+
+
+          <small
+            *ngIf="produits().length === 0"
+          >
+            Aucun produit actif disponible.
+          </small>
 
         </div>
 
@@ -237,7 +321,9 @@
 
         <div class="form-group">
 
-          <label>Montant (DT) *</label>
+          <label>
+            Montant (DT) *
+          </label>
 
           <input
             type="number"
@@ -251,11 +337,13 @@
         </div>
 
 
-        <!-- EXPIRATION -->
+        <!-- DATE EXPIRATION -->
 
         <div class="form-group">
 
-          <label>Date d'expiration</label>
+          <label>
+            Date d'expiration
+          </label>
 
           <input
             type="datetime-local"
@@ -267,6 +355,200 @@
 
       </div>
 
+
+      <!-- ========================================= -->
+      <!-- INFORMATIONS ASSURANCE AUTO -->
+      <!-- ========================================= -->
+
+      <div
+        class="auto-section"
+        *ngIf="isAssuranceAuto()"
+      >
+
+        <h3>
+          Informations du véhicule
+        </h3>
+
+        <p class="auto-section-description">
+          Renseignez les informations du véhicule à assurer.
+        </p>
+
+
+        <div class="form-grid">
+
+
+          <!-- IMMATRICULATION -->
+
+          <div class="form-group">
+
+            <label>
+              Immatriculation *
+            </label>
+
+            <input
+              type="text"
+              name="immatriculation"
+              [(ngModel)]="newDevisAuto.immatriculation"
+              placeholder="Ex : 123 TU 4567"
+              required
+            >
+
+          </div>
+
+
+          <!-- MARQUE -->
+
+          <div class="form-group">
+
+            <label>
+              Marque *
+            </label>
+
+            <input
+              type="text"
+              name="marque"
+              [(ngModel)]="newDevisAuto.marque"
+              placeholder="Ex : BMW"
+              required
+            >
+
+          </div>
+
+
+          <!-- MODÈLE -->
+
+          <div class="form-group">
+
+            <label>
+              Modèle *
+            </label>
+
+            <input
+              type="text"
+              name="modele"
+              [(ngModel)]="newDevisAuto.modele"
+              placeholder="Ex : 218i"
+              required
+            >
+
+          </div>
+
+
+          <!-- ANNÉE -->
+
+          <div class="form-group">
+
+            <label>
+              Année
+            </label>
+
+            <input
+              type="number"
+              name="annee"
+              [(ngModel)]="newDevisAuto.annee"
+              min="1900"
+              max="2100"
+              placeholder="Ex : 2022"
+            >
+
+          </div>
+
+
+          <!-- PUISSANCE -->
+
+          <div class="form-group">
+
+            <label>
+              Puissance fiscale (CV)
+            </label>
+
+            <input
+              type="number"
+              name="puissance_fiscale"
+              [(ngModel)]="newDevisAuto.puissance_fiscale"
+              min="1"
+              placeholder="Ex : 7"
+            >
+
+          </div>
+
+
+          <!-- VALEUR -->
+
+          <div class="form-group">
+
+            <label>
+              Valeur du véhicule (DT)
+            </label>
+
+            <input
+              type="number"
+              name="valeur_vehicule"
+              [(ngModel)]="newDevisAuto.valeur_vehicule"
+              min="0"
+              step="0.001"
+              placeholder="Ex : 95000"
+            >
+
+          </div>
+
+
+          <!-- MISE EN CIRCULATION -->
+
+          <div class="form-group">
+
+            <label>
+              Première mise en circulation
+            </label>
+
+            <input
+              type="date"
+              name="date_premiere_mise_circulation"
+              [(ngModel)]="newDevisAuto.date_premiere_mise_circulation"
+            >
+
+          </div>
+
+
+          <!-- USAGE -->
+
+          <div class="form-group">
+
+            <label>
+              Usage du véhicule
+            </label>
+
+            <select
+              name="usage_vehicule"
+              [(ngModel)]="newDevisAuto.usage_vehicule"
+            >
+
+              <option value="">
+                Sélectionner un usage
+              </option>
+
+              <option value="PRIVE">
+                Privé
+              </option>
+
+              <option value="PROFESSIONNEL">
+                Professionnel
+              </option>
+
+              <option value="COMMERCIAL">
+                Commercial
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ACTIONS FORMULAIRE -->
 
       <div class="modal-actions">
 
@@ -281,18 +563,237 @@
         <button
           type="submit"
           class="new-button"
-          [disabled]="savingDevis"
+          [disabled]="
+            savingDevis ||
+            produits().length === 0
+          "
         >
           {{
             savingDevis
-              ? 'Création...'
-              : 'Créer le devis'
+              ? 'Enregistrement...'
+              : editingDevis
+                ? 'Enregistrer les modifications'
+                : 'Créer le devis'
           }}
         </button>
 
       </div>
 
     </form>
+
+  </div>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- MODAL DÉTAILS ASSURANCE AUTO -->
+<!-- ================================================= -->
+
+<div
+  class="modal-overlay"
+  *ngIf="showAutoDetails && selectedDevisAuto"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <div>
+        <h2>
+          Détails du devis Auto
+        </h2>
+
+        <p>
+          Informations du véhicule assuré
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="closeAutoDetails()"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div
+      class="auto-details"
+      *ngIf="selectedDevisAuto"
+    >
+
+      <div class="form-grid">
+
+
+        <!-- IMMATRICULATION -->
+
+        <div class="detail-item">
+
+          <label>
+            Immatriculation
+          </label>
+
+          <strong>
+            {{ selectedDevisAuto.immatriculation }}
+          </strong>
+
+        </div>
+
+
+        <!-- MARQUE -->
+
+        <div class="detail-item">
+
+          <label>
+            Marque
+          </label>
+
+          <strong>
+            {{ selectedDevisAuto.marque }}
+          </strong>
+
+        </div>
+
+
+        <!-- MODÈLE -->
+
+        <div class="detail-item">
+
+          <label>
+            Modèle
+          </label>
+
+          <strong>
+            {{ selectedDevisAuto.modele }}
+          </strong>
+
+        </div>
+
+
+        <!-- ANNÉE -->
+
+        <div class="detail-item">
+
+          <label>
+            Année
+          </label>
+
+          <strong>
+            {{
+              selectedDevisAuto.annee
+                || 'Non renseignée'
+            }}
+          </strong>
+
+        </div>
+
+
+        <!-- PUISSANCE -->
+
+        <div class="detail-item">
+
+          <label>
+            Puissance fiscale
+          </label>
+
+          <strong>
+            {{
+              selectedDevisAuto.puissance_fiscale
+                !== null
+                ? selectedDevisAuto.puissance_fiscale + ' CV'
+                : 'Non renseignée'
+            }}
+          </strong>
+
+        </div>
+
+
+        <!-- VALEUR -->
+
+        <div class="detail-item">
+
+          <label>
+            Valeur du véhicule
+          </label>
+
+          <strong>
+            {{
+              selectedDevisAuto.valeur_vehicule
+                !== null
+                ? (
+                    selectedDevisAuto.valeur_vehicule
+                    | number:'1.3-3'
+                  ) + ' DT'
+                : 'Non renseignée'
+            }}
+          </strong>
+
+        </div>
+
+
+        <!-- DATE -->
+
+        <div class="detail-item">
+
+          <label>
+            Première mise en circulation
+          </label>
+
+          <strong>
+            {{
+              selectedDevisAuto.date_premiere_mise_circulation
+                ? (
+                    selectedDevisAuto.date_premiere_mise_circulation
+                    | date:'dd/MM/yyyy'
+                  )
+                : 'Non renseignée'
+            }}
+          </strong>
+
+        </div>
+
+
+        <!-- USAGE -->
+
+        <div class="detail-item">
+
+          <label>
+            Usage
+          </label>
+
+          <strong>
+            {{
+              selectedDevisAuto.usage_vehicule === 'PRIVE'
+                ? 'Privé'
+                : selectedDevisAuto.usage_vehicule === 'PROFESSIONNEL'
+                  ? 'Professionnel'
+                  : selectedDevisAuto.usage_vehicule === 'COMMERCIAL'
+                    ? 'Commercial'
+                    : 'Non renseigné'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        class="new-button"
+        (click)="closeAutoDetails()"
+      >
+        Fermer
+      </button>
+
+    </div>
 
   </div>
 

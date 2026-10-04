@@ -147,3 +147,190 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+/* Actions du tableau */
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-button,
+.delete-button {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+
+/* Modifier */
+
+.edit-button {
+  background: #e8f3ed;
+  color: #176b45;
+}
+
+.edit-button:hover {
+  background: #d5eadd;
+}
+
+
+/* Supprimer */
+
+.delete-button {
+  background: #fdecec;
+  color: #c0392b;
+}
+
+.delete-button:hover {
+  background: #f8d7d4;
+}
+
+
+/* Nouveau devis */
+
+.new-button {
+  border: none;
+  background: #176b45;
+  color: white;
+  padding: 11px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.new-button:hover {
+  background: #125637;
+}
+
+/* STATUT EN ATTENTE */
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* STATUT ACCEPTÉ */
+.status-accepted {
+  background: #e7f5ec;
+  color: #176b45;
+}
+
+/* STATUT REFUSÉ */
+.status-refused {
+  background: #fdecec;
+  color: #c0392b;
+}
+
+/* =========================
+   BOUTON VOIR DÉTAILS
+========================= */
+
+.details-button {
+  border: none;
+  background: #e8f0fe;
+  color: #175cd3;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.details-button:hover {
+  background: #d7e5fc;
+}
+
+
+/* =========================
+   SECTION ASSURANCE AUTO
+========================= */
+
+.auto-section {
+  margin-top: 25px;
+  padding-top: 22px;
+  border-top: 1px solid #edf0f2;
+}
+
+.auto-section h3 {
+  margin: 0 0 6px;
+  color: #176b45;
+  font-size: 17px;
+}
+
+.auto-section-description {
+  margin: 0 0 20px;
+  color: #87909b;
+  font-size: 13px;
+}
+
+
+/* =========================
+   DÉTAILS DU VÉHICULE
+========================= */
+
+.auto-details {
+  margin-top: 10px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  background: #f8faf9;
+  border: 1px solid #edf0f2;
+  border-radius: 10px;
+}
+
+.detail-item label {
+  color: #87909b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.detail-item strong {
+  color: #1f2937;
+  font-size: 15px;
+}
+
+
+/* =========================
+   RESPONSIVE TABLEAU
+========================= */
+
+@media (max-width: 900px) {
+
+  .content-card {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 850px;
+  }
+
+}
+
+
+/* =========================
+   RESPONSIVE MODAL
+========================= */
+
+@media (max-width: 650px) {
+
+  .modal {
+    padding: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+}

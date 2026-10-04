@@ -4,9 +4,10 @@ from sqlalchemy import text
 
 from app.api.clients import router as clients_router
 from app.api.devis import router as devis_router
+from app.api.contrats import router as contrats_router
 from app.db.database import engine
-
-
+from app.api.produits import router as produits_router
+from app.api import devis_auto
 app = FastAPI(
     title="Takafulia CRM API",
     description="API backend de la plateforme CRM Takafulia",
@@ -30,7 +31,9 @@ app.add_middleware(
 # Routes
 app.include_router(clients_router)
 app.include_router(devis_router)
-
+app.include_router(contrats_router)
+app.include_router(produits_router)
+app.include_router(devis_auto.router)
 @app.get("/")
 def root():
     return {

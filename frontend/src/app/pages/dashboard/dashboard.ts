@@ -18,6 +18,19 @@ interface Devis {
   date_expiration?: string;
 }
 
+interface Contrat {
+  id: number;
+  numero_contrat: string;
+  devis_id: number;
+  client_id: number;
+  produit: string;
+  montant: number;
+  statut: string;
+  date_debut: string;
+  date_fin?: string;
+  date_creation: string;
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -29,12 +42,14 @@ export class Dashboard implements OnInit {
 
   clientCount = signal(0);
   devisEnAttenteCount = signal(0);
+  contratsActifsCount = signal(0);
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.loadClientCount();
     this.loadDevisCount();
+    this.loadContratsCount();
   }
 
   loadClientCount(): void {
@@ -44,7 +59,6 @@ export class Dashboard implements OnInit {
         next: (clients) => {
           this.clientCount.set(clients.length);
         },
-
         error: (err) => {
           console.error(
             'Erreur lors du chargement des clients :',
@@ -59,17 +73,35 @@ export class Dashboard implements OnInit {
       .get<Devis[]>('http://127.0.0.1:8000/devis')
       .subscribe({
         next: (devis) => {
-
           const enAttente = devis.filter(
             d => d.statut === 'EN_ATTENTE'
           );
 
           this.devisEnAttenteCount.set(enAttente.length);
         },
-
         error: (err) => {
           console.error(
             'Erreur lors du chargement des devis :',
+            err
+          );
+        }
+      });
+  }
+
+  loadContratsCount(): void {
+    this.http
+      .get<Contrat[]>('http://127.0.0.1:8000/contrats')
+      .subscribe({
+        next: (contrats) => {
+          const actifs = contrats.filter(
+            contrat => contrat.statut === 'ACTIF'
+          );
+
+          this.contratsActifsCount.set(actifs.length);
+        },
+        error: (err) => {
+          console.error(
+            'Erreur lors du chargement des contrats :',
             err
           );
         }

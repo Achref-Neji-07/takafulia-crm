@@ -23,3 +23,34 @@ Thumbs.db
 
 # Logs
 *.log
+# Python virtual environments
+.venv/
+venv/
+backend/.venv/
+backend/Lib/
+backend/Scripts/
+backend/Include/
+backend/pyvenv.cfg
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Angular / Node
+node_modules/
+frontend/node_modules/
+dist/
+.angular/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
